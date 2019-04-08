@@ -5,3 +5,5 @@ authors = ["Arran France <arran@arranfrance.com>"]
 edition = "2018"
 
 [dependencies]
+unsigned-varint = "0.2.2"
+base64 = "0.10.1"
