@@ -6,7 +6,7 @@ pub enum Format {
 }
 
 impl Format {
-    pub fn from_u8(i: u8) -> Self {
+    pub fn from_u32(i: u32) -> Self {
         match i {
             0 => Format::Unknown,
             1 => Format::Wild,
@@ -22,26 +22,26 @@ mod tests {
 
     #[test]
     fn decode_wild() {
-        let input: u8 = 1;
-        assert_eq!(Format::Wild, Format::from_u8(input));
+        let input = 1;
+        assert_eq!(Format::Wild, Format::from_u32(input));
     }
 
     #[test]
     fn decode_standard() {
-        let input: u8 = 2;
-        assert_eq!(Format::Standard, Format::from_u8(input));
+        let input = 2;
+        assert_eq!(Format::Standard, Format::from_u32(input));
     }
 
     #[test]
     fn decode_unknown() {
-        let input: u8 = 0;
-        assert_eq!(Format::Unknown, Format::from_u8(input));
+        let input = 0;
+        assert_eq!(Format::Unknown, Format::from_u32(input));
     }
 
     #[should_panic]
     #[test]
     fn decode_panics_when_outside_known_range() {
-        let input: u8 = 13;
-        assert_eq!(Format::Unknown, Format::from_u8(input));
+        let input = 13;
+        assert_eq!(Format::Unknown, Format::from_u32(input));
     }
 }

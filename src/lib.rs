@@ -3,15 +3,15 @@
 extern crate base64;
 extern crate integer_encoding;
 
-mod deck_reader;
+mod deck;
 mod format;
 
-use crate::deck_reader::read;
+use crate::deck::*;
 use base64::{decode, encode};
 use integer_encoding::VarInt;
 
 pub fn decode_deck_code(deck_code: &str) {
-    dbg!(decode_code_to_u8_vec(deck_code));
+    let decoded: Vec<u32> = decode_code_to_u8_vec(deck_code);
 }
 
 /// Turns a Base64 deck code into a vector of u32 values that can then be mapped to the format of the deck
@@ -32,13 +32,9 @@ fn decode_code_to_u8_vec(deck_code: &str) -> Vec<u32> {
 mod tests {
     use super::*;
 
-    // #[should_panic]
     #[test]
     fn decode_code_to_u8_vec_correctly_decodes_a_simple_code() {
         let output = decode_code_to_u8_vec("AAEBAQcAAAQBAwIDAwMEAw==");
-        // Expected:
-        // Null Byte
-        // Versio
         let expected = vec![
             0, // Null byte
             1, // Version 1
@@ -67,7 +63,7 @@ mod tests {
         );
         let expected = vec![
             0, 1, 2, // Standard header
-            1, 637,   // Jaina,
+            1, 637,   // 1 Hero: Jaina,
             4,     // 4 Single Cards
             192,   // Ice Block
             39841, // Medivh, the Guardian
