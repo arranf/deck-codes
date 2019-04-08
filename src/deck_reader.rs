@@ -11,11 +11,6 @@ pub fn read(bytes: &Vec<u8>) {
     }
 
     let format: Format = Format::from_u8(bytes[2]);
-
-    // TODO: Check whether unknown is common
-    if format == Format::Unknown {
-        panic!("Invalid deck encoding: Unknown format")
-    }
 }
 
 #[cfg(test)]
