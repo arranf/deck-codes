@@ -1,7 +1,7 @@
 use crate::format::Format;
 
 #[derive(PartialEq, Debug)]
-struct Deck {
+pub struct Deck {
     format: Format,
     heroes: Vec<u32>,
     cards: Vec<(u8, u32)>,

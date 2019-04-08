@@ -6,12 +6,13 @@ extern crate integer_encoding;
 mod deck;
 mod format;
 
-use crate::deck::*;
+use crate::deck::Deck;
 use base64::{decode, encode};
 use integer_encoding::VarInt;
 
-pub fn decode_deck_code(deck_code: &str) {
+pub fn decode_deck_code(deck_code: &str) -> Deck {
     let decoded: Vec<u32> = decode_code_to_u8_vec(deck_code);
+    return Deck::new(&decoded);
 }
 
 /// Turns a Base64 deck code into a vector of u32 values that can then be mapped to the format of the deck
