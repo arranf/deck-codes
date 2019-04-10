@@ -12,7 +12,7 @@ use integer_encoding::VarInt;
 
 pub fn decode_deck_code(deck_code: &str) -> Deck {
     let decoded: Vec<u32> = decode_code_to_u32_vec(deck_code);
-    return Deck::new(&decoded);
+    Deck::new(&decoded)
 }
 
 pub fn encode_deck_code(deck: Deck) -> String {
@@ -30,7 +30,7 @@ fn decode_code_to_u32_vec(deck_code: &str) -> Vec<u32> {
         deck_code_decoded.push(read);
         decoded = decoded[size..].to_vec();
     }
-    return deck_code_decoded;
+    deck_code_decoded
 }
 
 fn encode_u32_vec_to_deck_code(byte_array: Vec<u32>) -> String {
@@ -42,7 +42,7 @@ fn encode_u32_vec_to_deck_code(byte_array: Vec<u32>) -> String {
             fixed_size_integers.push(encoded[encoded_index]);
         }
     }
-    return encode(&fixed_size_integers);
+    encode(&fixed_size_integers)
 }
 
 #[cfg(test)]
