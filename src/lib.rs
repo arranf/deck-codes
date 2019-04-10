@@ -10,13 +10,15 @@ use crate::deck::Deck;
 use base64::{decode, encode};
 use integer_encoding::VarInt;
 
+/// Turn a Hearthstone deck code into a Deck struct
 pub fn decode_deck_code(deck_code: &str) -> Deck {
     let decoded: Vec<u32> = decode_code_to_u32_vec(deck_code);
     Deck::new(&decoded)
 }
 
+/// Turn a deck struct into an importable Hearthstone deck code
 pub fn encode_deck_code(deck: Deck) -> String {
-    encode_u32_vec_to_deck_code(deck.to_byte_array());
+    encode_u32_vec_to_deck_code(deck.to_byte_array())
 }
 
 /// Turns a Base64 deck code into a vector of u32 values that can then be mapped to the format of the deck
@@ -33,6 +35,7 @@ fn decode_code_to_u32_vec(deck_code: &str) -> Vec<u32> {
     deck_code_decoded
 }
 
+/// Turns a vector of u32 values into a Base64 deck code
 fn encode_u32_vec_to_deck_code(byte_array: Vec<u32>) -> String {
     let mut fixed_size_integers: Vec<u8> = Vec::new();
     let mut encoded: [u8; 4] = [0, 0, 0, 0]; // This is calculated by taking the largest dbfid and calculating ceil(log(dbfid, 128)) as 128 is the largest value a u8 can store.

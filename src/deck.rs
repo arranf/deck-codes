@@ -1,26 +1,30 @@
 use crate::format::Format;
 
 #[derive(PartialEq, Debug)]
+/// A representation of a Hearthstone deck
 pub struct Deck {
-    version: u8,
-    format: Format,
-    heroes: Vec<u32>,
+    pub version: u8,
+    pub format: Format,
+    pub heroes: Vec<u32>,
     single_cards: Vec<u32>,
     double_cards: Vec<u32>,
     multi_cards: Vec<(u8, u32)>,
 }
 
 impl Deck {
+    /// The total number of cards in the deck
     pub fn total_cards(&self) -> usize {
         let mut card_count = self.single_cards.len() + self.double_cards.len() * 2;
         card_count = card_count + self.multi_cards.iter().fold(0, |acc, t| acc + t.0) as usize;
         card_count
     }
 
+    /// The number of distinct cards in the deck. Equivalent to the height of the deck when represented in hearthstone.
     fn total_card_slots(&self) -> usize {
         self.single_cards.len() + self.double_cards.len() + self.multi_cards.len()
     }
 
+    /// A representation of the cards in the array sorted by
     pub fn cards(&self) -> Vec<(u8, u32)> {
         let mut cards: Vec<(u8, u32)> = Vec::new();
         for card in &self.single_cards {
@@ -35,11 +39,13 @@ impl Deck {
             cards.push((*amount, *card));
         }
 
+        // Sort by id
         cards.sort_by(|a, b| a.1.partial_cmp(&b.1).expect("Error comparing values"));
 
         cards
     }
 
+    /// Create a new deck from vector of u32 bytes. This representation is described here: https://hearthsim.info/docs/deckstrings/
     pub fn new(bytes: &Vec<u32>) -> Self {
         let total_bytes = bytes.len();
 
@@ -109,6 +115,10 @@ impl Deck {
             index = index + 2;
         }
 
+        single_cards.sort();
+        double_cards.sort();
+        multi_cards.sort_by(|a, b| a.1.partial_cmp(&b.1).expect("Error comparing values"));
+
         Deck {
             version: version,
             format: format,
@@ -119,6 +129,7 @@ impl Deck {
         }
     }
 
+    /// Encode the deck as a u32 vector
     pub fn to_byte_array(&self) -> Vec<u32> {
         // Minimum amount: 0x0, version, format, hero count, single count, double count, multi-count (7 bytes) + count s
         let mut byte_array: Vec<u32> =

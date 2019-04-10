@@ -1,2 +1,3 @@
 # deckcodes
-A Rust library for encoding and decoding Hearthstone deck codes
+A Rust library for encoding and decoding Hearthstone deck codes.
+
