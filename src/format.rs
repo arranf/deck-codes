@@ -14,6 +14,14 @@ impl Format {
             _ => panic!("Error getting format from u8: Does not decode"),
         }
     }
+
+    pub fn to_u8(&self) -> u8 {
+        match &self {
+            Format::Unknown => 0,
+            Format::Wild => 1,
+            Format::Standard => 2,
+        }
+    }
 }
 
 #[cfg(test)]
