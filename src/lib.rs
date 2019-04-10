@@ -16,7 +16,7 @@ pub fn decode_deck_code(deck_code: &str) -> Deck {
 }
 
 pub fn encode_deck_code(deck: Deck) -> String {
-    return encode_u32_vec_to_deck_code(deck.to_byte_array());
+    encode_u32_vec_to_deck_code(deck.to_byte_array());
 }
 
 /// Turns a Base64 deck code into a vector of u32 values that can then be mapped to the format of the deck
