@@ -3,11 +3,15 @@ use crate::format::Format;
 #[derive(PartialEq, Debug)]
 /// A representation of a Hearthstone deck
 pub struct Deck {
-    pub version: u8,
+    version: u8,
     pub format: Format,
+    /// The dbfid of the heroes this deck should use
     pub heroes: Vec<u32>,
+    /// The dbfid of the cards in the deck that have a single copy
     single_cards: Vec<u32>,
+    /// The dbfid of the cards in the deck that have a two copies
     double_cards: Vec<u32>,
+    /// The dbfid of the cards in the deck that have a more than two copies. Stored as tupes of (number_of_copies, dbfid)
     multi_cards: Vec<(u8, u32)>,
 }
 
@@ -131,7 +135,7 @@ impl Deck {
 
     /// Encode the deck as a u32 vector
     pub fn to_byte_array(&self) -> Vec<u32> {
-        // Minimum amount: 0x0, version, format, hero count, single count, double count, multi-count (7 bytes) + count s
+        // Minimum amount: 0x0, version, format, hero count, single count, double count, multi-count (7 bytes) + counts
         let mut byte_array: Vec<u32> =
             Vec::with_capacity(7 + self.heroes.len() + self.total_card_slots());
         byte_array.append(&mut vec![
@@ -148,7 +152,6 @@ impl Deck {
         byte_array.push((self.multi_cards.len()) as u32);
         byte_array.extend(&flatten(&self.multi_cards));
 
-        dbg!(&byte_array);
         byte_array
     }
 }
