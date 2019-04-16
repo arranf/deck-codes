@@ -4,9 +4,9 @@ extern crate base64;
 extern crate custom_error;
 extern crate integer_encoding;
 
-mod deck;
-mod error;
-mod format;
+pub mod deck;
+pub mod error;
+pub mod format;
 
 use crate::deck::Deck;
 use crate::error::*;

@@ -1,0 +1,1 @@
+pub CURRENT_VERSION: u8 = 1;

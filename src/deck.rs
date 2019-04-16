@@ -44,11 +44,19 @@ impl Deck {
             cards.push((*amount, *card));
         }
 
-        // Sort by id
+        // Sort by amount, then by id
         cards.sort_by(|a, b| {
-            a.1.partial_cmp(&b.1)
-                // This should never occur
-                .expect("Error comparing values whilst sorting")
+            let initial_ordering =
+                a.0.partial_cmp(&b.0)
+                    .expect("Error comparing card count whilst sorting");
+            match initial_ordering {
+                std::cmp::Ordering::Equal => {
+                    a.1.partial_cmp(&b.1)
+                        // This should never occur
+                        .expect("Error comparing card ids whilst sorting")
+                }
+                _ => initial_ordering,
+            }
         });
 
         cards
@@ -300,6 +308,47 @@ mod tests {
             single_cards: Vec::new(),
             double_cards: Vec::new(),
             multi_cards: vec![(3, 1), (3, 2), (3, 3), (3, 4)],
+        };
+        let result = input.to_byte_array();
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn to_byte_array_matches_complex_example() {
+        let expected = vec![
+            0, 1, 2, // Standard header
+            1, 637,   // 1 Hero: Jaina,
+            4,     // 4 Single Cards
+            192,   // Ice Block
+            39841, // Medivh, the Guardian
+            42718, // Ghastly Conjurer
+            42790, // Bonemare
+            13,    // 13 Double Cards
+            113,   // Counter Spell
+            195,   // Mirror Entity
+            315,   // Fireball
+            405,   // Mana Wyrm
+            555,   // Arcane Intellect
+            662,   // Frostbolt
+            748,   // Kirin Tor Mage,
+            39715, // Firelands Portal
+            39767, // Medivh’s Valet
+            40297, // Volcanic Potion
+            40583, // Kabal Crystal Runner
+            41153, // Arcanologist
+            41496, // Primordial Glyph,
+            0,     // No 3+-copy cards
+        ];
+
+        let input = Deck {
+            format: Format::Standard,
+            version: 1,
+            heroes: vec![637],
+            single_cards: vec![192, 39841, 42718, 42790],
+            double_cards: vec![
+                113, 195, 315, 405, 555, 662, 748, 39715, 39767, 40297, 40583, 41153, 41496,
+            ],
+            multi_cards: Vec::new(),
         };
         let result = input.to_byte_array();
         assert_eq!(result, expected);
