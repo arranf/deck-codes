@@ -1,6 +1,6 @@
 [package]
 name = "deck_codes"
-version = "0.1.0"
+version = "0.2.0"
 description = "A library for decoding and encoding Hearthstone's deck code format"
 keywords = ["Hearthstone"]
 authors = ["Arran France <arran@arranfrance.com>"]
@@ -12,3 +12,4 @@ repository = "https://github.com/arranf/deck_codes"
 [dependencies]
 integer-encoding = "1.0.5"
 base64 = "0.10.1"
+custom_error = "1.6.0"

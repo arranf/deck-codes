@@ -1,3 +1,4 @@
+use crate::error::*;
 use crate::format::Format;
 
 #[derive(PartialEq, Debug)]
@@ -44,26 +45,36 @@ impl Deck {
         }
 
         // Sort by id
-        cards.sort_by(|a, b| a.1.partial_cmp(&b.1).expect("Error comparing values"));
+        cards.sort_by(|a, b| {
+            a.1.partial_cmp(&b.1)
+                // This should never occur
+                .expect("Error comparing values whilst sorting")
+        });
 
         cards
     }
 
     /// Create a new deck from vector of u32 bytes. This representation is described here: https://hearthsim.info/docs/deckstrings/
-    pub fn new(bytes: &Vec<u32>) -> Self {
+    pub fn new(bytes: &Vec<u32>) -> Result<Self, DeckCodeError> {
         let total_bytes = bytes.len();
 
         if total_bytes < 7 {
-            panic!("Invalid deck encoding: length is too small");
+            return Err(DeckCodeError::InvalidDeckEncoding {
+                encoding_type: String::from("Length is too small"),
+            });
         }
 
         if bytes[0] != 0 {
-            panic!("Invalid deck encoding: No leading 0 byte found")
+            return Err(DeckCodeError::InvalidDeckEncoding {
+                encoding_type: String::from("No leading 0 byte found"),
+            });
         }
 
         let version = bytes[1] as u8;
         if version != 1 {
-            panic!("Invalid deck encoding: Invalid or unsupported version")
+            return Err(DeckCodeError::InvalidDeckEncoding {
+                encoding_type: String::from("Invalid or unsupported version"),
+            });
         }
 
         let format: Format = Format::from_u32(bytes[2]);
@@ -74,19 +85,31 @@ impl Deck {
         let single_card_count = bytes[last_hero_byte + 1];
         let last_single_card_byte = next_end(last_hero_byte, single_card_count);
         if last_single_card_byte as usize > total_bytes {
-            panic!("Error in deck encoding: Length of card sections do not match number of bytes");
+            return Err(DeckCodeError::InvalidDeckEncoding {
+                encoding_type: String::from(
+                    "Length of card sections does not match number of bytes",
+                ),
+            });
         }
 
         let double_card_count = bytes[last_single_card_byte + 1];
         let last_double_card_byte = next_end(last_single_card_byte, double_card_count);
         if last_double_card_byte as usize > total_bytes {
-            panic!("Error in deck encoding: Length of card sections do not match number of bytes");
+            return Err(DeckCodeError::InvalidDeckEncoding {
+                encoding_type: String::from(
+                    "Length of card sections does not match number of bytes",
+                ),
+            });
         }
 
         let multi_card_count = bytes[last_double_card_byte + 1];
         let last_multi_card_byte = next_end(last_double_card_byte, multi_card_count * 2); // 2 * because this section stores count and card id
         if last_multi_card_byte as usize > total_bytes {
-            panic!("Error in deck encoding: Length of card sections do not match number of bytes");
+            return Err(DeckCodeError::InvalidDeckEncoding {
+                encoding_type: String::from(
+                    "Length of card sections does not match number of bytes",
+                ),
+            });
         }
 
         // Iterate over heroes
@@ -121,16 +144,20 @@ impl Deck {
 
         single_cards.sort();
         double_cards.sort();
-        multi_cards.sort_by(|a, b| a.1.partial_cmp(&b.1).expect("Error comparing values"));
+        multi_cards.sort_by(|a, b| {
+            a.1.partial_cmp(&b.1)
+                // This should never occur
+                .expect("Error comparing values whilst sorting")
+        });
 
-        Deck {
+        Ok(Deck {
             version: version,
             format: format,
             heroes: heroes,
             single_cards: single_cards,
             double_cards: double_cards,
             multi_cards: multi_cards,
-        }
+        })
     }
 
     /// Encode the deck as a u32 vector
@@ -173,30 +200,29 @@ fn next_end(previous_end: usize, total_number: u32) -> usize {
 mod tests {
     use super::*;
 
-    #[should_panic]
     #[test]
-    fn new_panics_if_there_is_a_small_number_of_bytes_than_7() {
+    fn new_returns_err_if_there_is_a_small_number_of_bytes_than_7() {
         let input = vec![0, 1, 2];
-        Deck::new(&input);
+        let result = Deck::new(&input);
+        assert!(result.is_err());
     }
 
-    #[should_panic]
     #[test]
-    fn new_panics_if_there_is_no_leading_0_byte() {
+    fn new_returns_err_if_there_is_no_leading_0_byte() {
         let input = vec![1, 2, 3, 4, 5, 6, 7, 8, 9];
-        Deck::new(&input);
+        let result = Deck::new(&input);
+        assert!(result.is_err());
     }
 
-    #[should_panic]
     #[test]
-    fn new_panics_if_there_is_an_unexpected_version() {
+    fn new_returns_err_if_there_is_an_unexpected_version() {
         let input = vec![0, 2, 0, 0, 0, 0, 0, 0, 0, 0];
-        Deck::new(&input);
+        let result = Deck::new(&input);
+        assert!(result.is_err());
     }
 
-    #[should_panic]
     #[test]
-    fn new_panics_if_there_is_a_larger_suggested_number_of_bytes_than_total_bytes() {
+    fn new_returns_err_if_there_is_a_larger_suggested_number_of_bytes_than_total_bytes() {
         let input = vec![
             0, 1, 1, //
             // Hero Section
@@ -207,7 +233,8 @@ mod tests {
             0, // Paired (Id, Count) Section
             0,
         ];
-        Deck::new(&input);
+        let result = Deck::new(&input);
+        assert!(result.is_err());
     }
 
     #[test]
@@ -241,8 +268,8 @@ mod tests {
             double_cards: Vec::new(),
             multi_cards: vec![(3, 1), (3, 2), (3, 3), (3, 4)],
         };
-
-        assert_eq!(result, expected);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), expected);
     }
 
     #[test]

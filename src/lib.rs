@@ -1,29 +1,32 @@
 #![allow(clippy::all, clippy::pedantic)]
 
 extern crate base64;
+extern crate custom_error;
 extern crate integer_encoding;
 
 mod deck;
+mod error;
 mod format;
 
 use crate::deck::Deck;
+use crate::error::*;
 use base64::{decode, encode};
 use integer_encoding::VarInt;
 
-/// Turn a Hearthstone deck code into a Deck struct
-pub fn decode_deck_code(deck_code: &str) -> Deck {
-    let decoded: Vec<u32> = decode_code_to_u32_vec(deck_code);
+/// Convert a Hearthstone deck code into a Deck struct
+pub fn decode_deck_code(deck_code: &str) -> Result<Deck, DeckCodeError> {
+    let decoded: Vec<u32> = decode_code_to_u32_vec(deck_code)?;
     Deck::new(&decoded)
 }
 
-/// Turn a deck struct into an importable Hearthstone deck code
+/// Convert a deck struct into an importable Hearthstone deck code
 pub fn encode_deck_code(deck: Deck) -> String {
     encode_u32_vec_to_deck_code(deck.to_byte_array())
 }
 
-/// Turns a Base64 deck code into a vector of u32 values that can then be mapped to the format of the deck
-fn decode_code_to_u32_vec(deck_code: &str) -> Vec<u32> {
-    let mut decoded = decode(deck_code).expect("An error occured decoding the deck string");
+/// Convert a Base64 deck code into a vector of u32 values that can then be mapped to the format of the deck
+fn decode_code_to_u32_vec(deck_code: &str) -> Result<Vec<u32>, DeckCodeError> {
+    let mut decoded = decode(deck_code)?;
 
     let mut deck_code_decoded: Vec<u32> = vec![];
     // Read u8 values as u32 varints
@@ -32,10 +35,10 @@ fn decode_code_to_u32_vec(deck_code: &str) -> Vec<u32> {
         deck_code_decoded.push(read);
         decoded = decoded[size..].to_vec();
     }
-    deck_code_decoded
+    Ok(deck_code_decoded)
 }
 
-/// Turns a vector of u32 values into a Base64 deck code
+/// Convert a vector of u32 values into a Base64 deck code
 fn encode_u32_vec_to_deck_code(byte_array: Vec<u32>) -> String {
     let mut fixed_size_integers: Vec<u8> = Vec::new();
     let mut encoded: [u8; 4] = [0, 0, 0, 0]; // This is calculated by taking the largest dbfid and calculating ceil(log(dbfid, 128)) as 128 is the largest value a u8 can store.
@@ -54,7 +57,7 @@ mod tests {
 
     #[test]
     fn decode_code_to_u32_vec_correctly_decodes_a_simple_code() {
-        let output = decode_code_to_u32_vec("AAEBAQcAAAQBAwIDAwMEAw==");
+        let result = decode_code_to_u32_vec("AAEBAQcAAAQBAwIDAwMEAw==");
         let expected = vec![
             0, // Null byte
             1, // Version 1
@@ -73,7 +76,8 @@ mod tests {
             3, 3, //
             4, 3, //
         ];
-        assert_eq!(output, expected);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), expected);
     }
 
     #[test]
@@ -97,13 +101,13 @@ mod tests {
             4, 3, //
         ];
         let expected = "AAEBAQcAAAQBAwIDAwMEAw==";
-        let output = encode_u32_vec_to_deck_code(input);
-        assert_eq!(output, expected);
+        let result = encode_u32_vec_to_deck_code(input);
+        assert_eq!(result, expected);
     }
 
     #[test]
     fn decode_code_to_u8_vec_correctly_decodes_a_complex_code() {
-        let output = decode_code_to_u32_vec(
+        let result = decode_code_to_u32_vec(
             "AAECAf0EBMABobcC3s0Cps4CDXHDAbsClQOrBJYF7AWjtgLXtgLpugKHvQLBwQKYxAIA",
         );
         let expected = vec![
@@ -130,7 +134,8 @@ mod tests {
             41496, // Primordial Glyph,
             0,     // No 3+-copy cards
         ];
-        assert_eq!(output, expected);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), expected);
     }
 
     #[test]
