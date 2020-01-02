@@ -20,7 +20,7 @@ impl Deck {
     /// The total number of cards in the deck
     pub fn total_cards(&self) -> usize {
         let mut card_count = self.single_cards.len() + self.double_cards.len() * 2;
-        card_count = card_count + self.multi_cards.iter().fold(0, |acc, t| acc + t.0) as usize;
+        card_count += self.multi_cards.iter().fold(0, |acc, t| acc + t.0) as usize;
         card_count
     }
 
@@ -63,7 +63,7 @@ impl Deck {
     }
 
     /// Create a new deck from vector of u32 bytes. This representation is described here: https://hearthsim.info/docs/deckstrings/
-    pub fn new(bytes: &Vec<u32>) -> Result<Self, DeckCodeError> {
+    pub fn new(bytes: &[u32]) -> Result<Self, DeckCodeError> {
         let total_bytes = bytes.len();
 
         if total_bytes < 7 {
@@ -123,20 +123,20 @@ impl Deck {
         // Iterate over heroes
         let first_hero_byte: usize = 4;
         let mut heroes: Vec<u32> = Vec::new();
-        for i in first_hero_byte..(last_hero_byte + 1) {
+        for i in first_hero_byte..=last_hero_byte {
             heroes.push(bytes[i]);
         }
 
         // Iterate over cards
         let mut single_cards: Vec<u32> = Vec::with_capacity(single_card_count as usize);
         let first_single_card_byte: usize = last_hero_byte + 2;
-        for i in first_single_card_byte..(last_single_card_byte + 1) {
+        for i in first_single_card_byte..=last_single_card_byte {
             single_cards.push(bytes[i]);
         }
 
         let mut double_cards: Vec<u32> = Vec::with_capacity(double_card_count as usize);
         let first_double_card_byte: usize = last_single_card_byte + 2;
-        for i in first_double_card_byte..(last_double_card_byte + 1) {
+        for i in first_double_card_byte..=last_double_card_byte {
             double_cards.push(bytes[i]);
         }
 
@@ -147,7 +147,7 @@ impl Deck {
             let card = bytes[index];
             let number_of_card = bytes[index + 1] as u8;
             multi_cards.push((number_of_card, card));
-            index = index + 2;
+            index += 2;
         }
 
         single_cards.sort();
@@ -158,13 +158,13 @@ impl Deck {
                 .expect("Error comparing values whilst sorting")
         });
 
-        Ok(Deck {
-            version: version,
-            format: format,
-            heroes: heroes,
-            single_cards: single_cards,
-            double_cards: double_cards,
-            multi_cards: multi_cards,
+        Ok(Self {
+            version,
+            format,
+            heroes,
+            single_cards,
+            double_cards,
+            multi_cards,
         })
     }
 
@@ -201,7 +201,7 @@ fn flatten(intervals: &[(u8, u32)]) -> Vec<u32> {
 }
 
 fn next_end(previous_end: usize, total_number: u32) -> usize {
-    return previous_end + total_number as usize + 1;
+    previous_end + total_number as usize + 1
 }
 
 #[cfg(test)]

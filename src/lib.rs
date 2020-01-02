@@ -1,4 +1,4 @@
-#![allow(clippy::all, clippy::pedantic)]
+#![warn(clippy::all, clippy::pedantic)]
 
 extern crate base64;
 extern crate custom_error;
@@ -20,7 +20,7 @@ pub fn decode_deck_code(deck_code: &str) -> Result<Deck, DeckCodeError> {
 }
 
 /// Convert a deck struct into an importable Hearthstone deck code
-pub fn encode_deck_code(deck: Deck) -> String {
+pub fn encode_deck_code(deck: &Deck) -> String {
     encode_u32_vec_to_deck_code(deck.to_byte_array())
 }
 
@@ -30,7 +30,7 @@ fn decode_code_to_u32_vec(deck_code: &str) -> Result<Vec<u32>, DeckCodeError> {
 
     let mut deck_code_decoded: Vec<u32> = vec![];
     // Read u8 values as u32 varints
-    while decoded.len() > 0 {
+    while !decoded.is_empty() {
         let (read, size) = u32::decode_var(&decoded);
         deck_code_decoded.push(read);
         decoded = decoded[size..].to_vec();

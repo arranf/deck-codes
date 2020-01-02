@@ -8,18 +8,18 @@ pub enum Format {
 impl Format {
     pub fn from_u32(i: u32) -> Self {
         match i {
-            0 => Format::Unknown,
-            1 => Format::Wild,
-            2 => Format::Standard,
+            0 => Self::Unknown,
+            1 => Self::Wild,
+            2 => Self::Standard,
             _ => panic!("Error getting format from u8: Does not decode"),
         }
     }
 
     pub fn to_u8(&self) -> u8 {
         match &self {
-            Format::Unknown => 0,
-            Format::Wild => 1,
-            Format::Standard => 2,
+            Self::Unknown => 0,
+            Self::Wild => 1,
+            Self::Standard => 2,
         }
     }
 }
