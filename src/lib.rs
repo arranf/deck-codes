@@ -1,9 +1,5 @@
 #![warn(clippy::all, clippy::pedantic)]
 
-extern crate base64;
-extern crate custom_error;
-extern crate integer_encoding;
-
 pub mod deck;
 pub mod error;
 pub mod format;
@@ -31,7 +27,7 @@ fn decode_code_to_u32_vec(deck_code: &str) -> Result<Vec<u32>, DeckCodeError> {
     let mut deck_code_decoded: Vec<u32> = vec![];
     // Read u8 values as u32 varints
     while !decoded.is_empty() {
-        let (read, size) = u32::decode_var(&decoded);
+        let (read, size) = u32::decode_var(&decoded).ok_or(DeckCodeError::Unknown)?;
         deck_code_decoded.push(read);
         decoded = decoded[size..].to_vec();
     }

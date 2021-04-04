@@ -3,6 +3,7 @@ pub enum Format {
     Unknown,
     Wild,
     Standard,
+    Classic,
 }
 
 impl Format {
@@ -11,6 +12,7 @@ impl Format {
             0 => Self::Unknown,
             1 => Self::Wild,
             2 => Self::Standard,
+            3 => Self::Classic,
             _ => panic!("Error getting format from u8: Does not decode"),
         }
     }
@@ -20,6 +22,7 @@ impl Format {
             Self::Unknown => 0,
             Self::Wild => 1,
             Self::Standard => 2,
+            Self::Classic => 3,
         }
     }
 }
