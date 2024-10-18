@@ -5,11 +5,11 @@ description = "A library for decoding and encoding Hearthstone's deck code forma
 keywords = ["Hearthstone"]
 authors = ["Arran France <arran@arranfrance.com>"]
 license = "MIT"
-edition = "2018"
+edition = "2021"
 readme = "README.md"
 repository = "https://github.com/arranf/deck_codes"
 
 [dependencies]
-integer-encoding = "3.0.2"
-base64 = "0.13.0"
-thiserror = "1.0"
+integer-encoding = "4.0.2"
+base64 = "0.13.1"
+thiserror = "1.0.64"

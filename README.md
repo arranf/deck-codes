@@ -5,7 +5,7 @@
 
 A Rust library for encoding and decoding Hearthstone deck codes or deckstrings.
 
-Examples of deck codes can be found  [here](https://hearthsim.info/docs/deckstrings/).
+Examples of deck codes can be found [here](https://hearthsim.info/docs/deckstrings/).
 
 Any deckstring or deck definition returned by this library will be canonical.
 This means that the cards and heroes are sorted in ascending order by dbf id.
