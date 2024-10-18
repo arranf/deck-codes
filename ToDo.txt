@@ -1,4 +1,3 @@
-* Stop using panic! and return results instead
 * Generate docs
 * An example CLI tool that uses this library
 * More tests

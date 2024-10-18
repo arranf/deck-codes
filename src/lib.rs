@@ -5,17 +5,22 @@ pub mod error;
 pub mod format;
 
 use crate::deck::Deck;
-use crate::error::*;
+use crate::error::DeckCodeError;
 use base64::{decode, encode};
 use integer_encoding::VarInt;
 
-/// Convert a Hearthstone deck code into a Deck struct
+/// Convert a Hearthstone deck code into a `Deck` struct
+/// # Errors
+///
+/// Will return `Err` if the version of the deck code is not supported or if
+/// the deck code is invalid.
 pub fn decode_deck_code(deck_code: &str) -> Result<Deck, DeckCodeError> {
     let decoded: Vec<u32> = decode_code_to_u32_vec(deck_code)?;
     Deck::new(&decoded)
 }
 
 /// Convert a deck struct into an importable Hearthstone deck code
+#[must_use]
 pub fn encode_deck_code(deck: &Deck) -> String {
     encode_u32_vec_to_deck_code(deck.to_byte_array())
 }
@@ -35,9 +40,10 @@ fn decode_code_to_u32_vec(deck_code: &str) -> Result<Vec<u32>, DeckCodeError> {
 }
 
 /// Convert a vector of u32 values into a Base64 deck code
+#[allow(clippy::needless_range_loop)]
 fn encode_u32_vec_to_deck_code(byte_array: Vec<u32>) -> String {
     let mut fixed_size_integers: Vec<u8> = Vec::new();
-    let mut encoded: [u8; 4] = [0, 0, 0, 0]; // This is calculated by taking the largest dbfid and calculating ceil(log(dbfid, 128)) as 128 is the largest value a u8 can store.
+    let mut encoded: [u8; 4] = [0, 0, 0, 0]; // This length of array is calculated by taking the largest dbfid and calculating ceil(log(dbfid, 128)) as 128 is the largest value a u8 can store.
     for i in byte_array {
         let encoded_bytes = i.encode_var(&mut encoded[..]);
         for encoded_index in 0..encoded_bytes {
