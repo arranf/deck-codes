@@ -6,7 +6,8 @@ pub mod format;
 
 use crate::deck::Deck;
 use crate::error::DeckCodeError;
-use base64::{decode, encode};
+
+use base64::prelude::*;
 use integer_encoding::VarInt;
 
 /// Convert a Hearthstone deck code into a `Deck` struct
@@ -27,7 +28,7 @@ pub fn encode_deck_code(deck: &Deck) -> String {
 
 /// Convert a Base64 deck code into a vector of u32 values that can then be mapped to the format of the deck
 fn decode_code_to_u32_vec(deck_code: &str) -> Result<Vec<u32>, DeckCodeError> {
-    let mut decoded = decode(deck_code)?;
+    let mut decoded = BASE64_STANDARD.decode(deck_code)?;
 
     let mut deck_code_decoded: Vec<u32> = vec![];
     // Read u8 values as u32 varints
@@ -50,7 +51,7 @@ fn encode_u32_vec_to_deck_code(byte_array: Vec<u32>) -> String {
             fixed_size_integers.push(encoded[encoded_index]);
         }
     }
-    encode(&fixed_size_integers)
+    BASE64_STANDARD.encode(&fixed_size_integers)
 }
 
 #[cfg(test)]
